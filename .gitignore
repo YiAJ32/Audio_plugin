@@ -1,0 +1,13 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Build
+build/
+bin/
+CMakeFiles/
+CMakeCache.txt
+
+# Otros
+*.log
