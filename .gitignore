@@ -11,3 +11,6 @@ CMakeCache.txt
 
 # Otros
 *.log
+**Builds/
+**JuceLibraryCode/
+**.DS_Store
