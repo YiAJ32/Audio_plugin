@@ -1,3 +1,6 @@
 [submodule "JUCE"]
 	path = JUCE
 	url = https://github.com/juce-framework/JUCE.git
+[submodule "SimpleMiltuBandComp"]
+	path = SimpleMiltuBandComp
+	url = https://github.com/matkatmusic/Project13_FreeCodeCamp.git

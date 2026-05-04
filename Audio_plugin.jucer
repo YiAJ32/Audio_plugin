@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="WXlHDO" name="Audio_plugin" projectType="audioplug" useAppConfig="0"
-              addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1">
+              addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1"
+              cppLanguageStandard="20">
   <MAINGROUP id="fzl1OE" name="Audio_plugin">
     <GROUP id="{9FF7891C-9F34-6673-B82E-C661E8508F69}" name="Source">
       <FILE id="ysHy1i" name="PluginProcessor.cpp" compile="1" resource="0"
