@@ -22,6 +22,11 @@ Audio_pluginAudioProcessor::Audio_pluginAudioProcessor()
                        )
 #endif
 {
+   /* for (auto * ptr : dspInstances) {
+        ptr->reset();
+        ptr->process(context);
+        ptr->prepare(spec);
+    }*/
 }
 
 Audio_pluginAudioProcessor::~Audio_pluginAudioProcessor()
@@ -129,6 +134,8 @@ bool Audio_pluginAudioProcessor::isBusesLayoutSupported (const BusesLayout& layo
 }
 #endif
 
+
+
 void Audio_pluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
@@ -150,12 +157,12 @@ void Audio_pluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     // the samples and the outer loop is handling the channels.
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
-    {
-        auto* channelData = buffer.getWritePointer (channel);
+    //for (int channel = 0; channel < totalNumInputChannels; ++channel)
+    //{
+    //    auto* channelData = buffer.getWritePointer (channel);
 
-        // ..do something to the data...
-    }
+    //    // ..do something to the data...
+    //}
 }
 
 //==============================================================================
