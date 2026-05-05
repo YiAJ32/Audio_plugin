@@ -5,6 +5,9 @@
               cppLanguageStandard="20">
   <MAINGROUP id="fzl1OE" name="Audio_plugin">
     <GROUP id="{9FF7891C-9F34-6673-B82E-C661E8508F69}" name="Source">
+      <GROUP id="{5AFBE61A-0C8E-53A6-F405-9C73F02288D2}" name="DSP">
+        <FILE id="fPlXeU" name="Fifo.h" compile="0" resource="0" file="SimpleMiltuBandComp/SimpleMultiBandComp/Source/DSP/Fifo.h"/>
+      </GROUP>
       <FILE id="ysHy1i" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="qiiQb8" name="PluginProcessor.h" compile="0" resource="0"
@@ -18,8 +21,8 @@
   <EXPORTFORMATS>
     <VS2022 targetFolder="Builds/VisualStudio2022">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="1" name="Debug" targetName="Audio_plugin"/>
-        <CONFIGURATION isDebug="0" name="Release" targetName="Audio_plugin"/>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="Audio_plugin" headerPath="..\..\SimpleMultiBandComp\SimpleMultiBandComp\Source&#10;..\..\SimpleMultiBandComp\SimpleMultiBandComp\Source/GUI&#10;..\..\SimpleMultiBandComp\SimpleMultiBandComp\Source/DSP"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="Audio_plugin" headerPath="..\..\SimpleMultiBandComp\SimpleMultiBandComp\Source&#10;..\..\SimpleMultiBandComp\SimpleMultiBandComp\Source/GUI&#10;..\..\SimpleMultiBandComp\SimpleMultiBandComp\Source/DSP"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_audio_basics" path="JUCE/modules"/>
