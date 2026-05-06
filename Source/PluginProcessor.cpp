@@ -9,6 +9,12 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+auto getPhaserRateName() { return juce::String("Phaser RateHz"); }
+auto getPhaserCenterFreqName() { return juce::String("Phaser Center FreqHz"); }
+auto getPhaserDepthName() { return juce::String("Phaser Depth %"); }
+auto getPhaserFeedbackName() { return juce::String("Phaser Feedback %"); }
+auto getPhaserMixName() { return juce::String("Phaser Mix %"); }
+
 //==============================================================================
 Audio_pluginAudioProcessor::Audio_pluginAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -22,11 +28,28 @@ Audio_pluginAudioProcessor::Audio_pluginAudioProcessor()
                        )
 #endif
 {
-   /* for (auto * ptr : dspInstances) {
-        ptr->reset();
-        ptr->process(context);
-        ptr->prepare(spec);
-    }*/
+    auto phaserParams = std::array{
+        &phaserRateHz,
+        &phaserCenterFreqHz,
+        &phaserDepthPercent,
+        &phaserFeedbackPercent,
+        &phaserMixPercent
+    };
+
+    auto phaserFuncs = std::array{
+        &getPhaserRateName,
+        &getPhaserCenterFreqName,
+        &getPhaserDepthName,
+        &getPhaserFeedbackName,
+        &getPhaserMixName
+    };
+
+    for (size_t i = 0; i < phaserParams.size(); ++i) {
+        auto ptrToParamPtr = phaserParams[i];
+        *ptrToParamPtr = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(phaserFuncs[i]()));
+        jassert(*ptrToParamPtr != nullptr);
+    }
+
 }
 
 Audio_pluginAudioProcessor::~Audio_pluginAudioProcessor()
@@ -138,6 +161,54 @@ juce::AudioProcessorValueTreeState::ParameterLayout
 Audio_pluginAudioProcessor::createParameterLayout() {
 
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
+
+
+    const int versionHint = 1;
+    auto name = getPhaserRateName();
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+    juce::ParameterID(name, versionHint),
+        name,
+        juce::NormalisableRange<float>(0.01f, 2.f, 0.01f, 1.f),
+        0.2f,
+        "Hz"));
+
+    //phaser depth 0 - 1
+    name = getPhaserDepthName();
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID(name, versionHint),
+        name,
+        juce::NormalisableRange<float>(0.01f, 2.f, 0.01f, 1.f),
+        0.2f,
+        "Hz"));
+
+    //phaser center freq: audio hz
+    name = getPhaserCenterFreqName();
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID(name, versionHint),
+        name, 
+        juce::NormalisableRange<float>(0.01f, 1.f,0.01f, 1.f ),
+        0.05f,
+        "Hz"));
+
+
+    //phaser feedback: -1 to 1
+    name = getPhaserFeedbackName();
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID(name, versionHint),
+        name,
+        juce::NormalisableRange<float>(-1.f, 1.f, 0.01f, 1.f),
+        0.0f,
+        "%"));
+
+
+    //phaser mix: 0 to 1
+    name = getPhaserMixName();
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID(name, versionHint),
+        name,
+        juce::NormalisableRange<float>(0.01f, 1.f, 0.01f, 1.f),
+        0.05f,
+        "%"));
     return layout;
 }
 
@@ -156,8 +227,7 @@ void Audio_pluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    //TO DO: Add apvts
-    
+    //TO DO[DONE]: Add apvts
     //TO DO[DONE]: create audio param for all dps choices
     //TO DO: update dsp for audio params
     //TO DO: save/load settings
@@ -207,7 +277,7 @@ void Audio_pluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
     //process and create an audio block
     auto block = juce::dsp::AudioBlock<float>(buffer);
-    auto context = juce::dsp::ProcessContextReplacing<float>(block);
+    auto context = juce::dsp::ProcessContextReplacing<float>(block); //fail 
 
     for (size_t i = 0; i < dspPointers.size(); ++i) {
         if (dspPointers[i] != nullptr) {
