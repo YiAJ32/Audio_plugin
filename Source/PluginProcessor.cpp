@@ -134,7 +134,12 @@ bool Audio_pluginAudioProcessor::isBusesLayoutSupported (const BusesLayout& layo
 }
 #endif
 
+juce::AudioProcessorValueTreeState::ParameterLayout
+Audio_pluginAudioProcessor::createParameterLayout() {
 
+    juce::AudioProcessorValueTreeState::ParameterLayout layout;
+    return layout;
+}
 
 void Audio_pluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
@@ -150,6 +155,23 @@ void Audio_pluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     // this code if your algorithm always overwrites all the output channels.
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
+
+    //TO DO: Add apvts
+    
+    //TO DO[DONE]: create audio param for all dps choices
+    //TO DO: update dsp for audio params
+    //TO DO: save/load settings
+    //TO DO: save/load dps order
+    //TO DO: Drag to reorder guid
+    //TO DO: metering
+    //TO DO: preparing all dsp 
+    //TO DO: web/dry knob
+    //TO DO: mono & stereo options
+    //TO DO: modulators
+    //TO DO: thread save filtering update
+    //TO DO: pre/post filtering
+    //TO DO: delay module
+
 
     auto newDSPOrder = DSP_Order();
 
