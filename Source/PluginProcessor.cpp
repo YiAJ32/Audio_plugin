@@ -15,6 +15,22 @@ auto getPhaserDepthName() { return juce::String("Phaser Depth %"); }
 auto getPhaserFeedbackName() { return juce::String("Phaser Feedback %"); }
 auto getPhaserMixName() { return juce::String("Phaser Mix %"); }
 
+
+
+/*
+Chorus:
+Rate: hz
+Deph: 0 to 1
+Center delay: ms(1 to 100)
+Feedback: -1 to 1
+Mix: 0 to 1
+*/
+auto getChorusRateName() { return juce::String("Chorus RateHz"); }
+auto getChorusDepthName() { return juce::String("Chorus Depth %"); }
+auto getChorusCenterDelayName() { return juce::String("Chorus Center Delay ms"); }
+auto getChorusFeedbackName() { return juce::String("Chorus Feedback %"); }
+auto getChorusMixName() { return juce::String("Chorus Mix %"); }
+
 //==============================================================================
 Audio_pluginAudioProcessor::Audio_pluginAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -228,7 +244,7 @@ void Audio_pluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
         buffer.clear (i, 0, buffer.getNumSamples());
 
     //TO DO[DONE]: Add apvts
-    //TO DO[DONE]: create audio param for all dps choices
+    //TO DO: create audio param for all dps choices
     //TO DO: update dsp for audio params
     //TO DO: save/load settings
     //TO DO: save/load dps order

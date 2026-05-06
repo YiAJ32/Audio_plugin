@@ -85,6 +85,20 @@ public:
     juce::AudioParameterFloat* phaserDepthPercent = nullptr;
     juce::AudioParameterFloat* phaserFeedbackPercent = nullptr;
     juce::AudioParameterFloat* phaserMixPercent = nullptr;
+
+    /*
+    Chorus:
+    Rate: hz
+    Deph: 0 to 1
+    Center delay: ms(1 to 100)
+    Feedback: -1 to 1
+    Mix: 0 to 1
+*/
+    juce::AudioParameterFloat* ChorusRateHz = nullptr;
+    juce::AudioParameterFloat* ChorusDepthPercent = nullptr;
+    juce::AudioParameterFloat* ChorusCenterDelayMs = nullptr;
+    juce::AudioParameterFloat* ChorusFeedbackPercent = nullptr;
+    juce::AudioParameterFloat* ChorusMixPercent = nullptr;
 private:
     //==============================================================================
     DSP_Order dspOrder;
