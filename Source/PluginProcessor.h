@@ -94,11 +94,11 @@ public:
     Feedback: -1 to 1
     Mix: 0 to 1
 */
-    juce::AudioParameterFloat* ChorusRateHz = nullptr;
-    juce::AudioParameterFloat* ChorusDepthPercent = nullptr;
-    juce::AudioParameterFloat* ChorusCenterDelayMs = nullptr;
-    juce::AudioParameterFloat* ChorusFeedbackPercent = nullptr;
-    juce::AudioParameterFloat* ChorusMixPercent = nullptr;
+    juce::AudioParameterFloat* chorusRateHz = nullptr;
+    juce::AudioParameterFloat* chorusDepthPercent = nullptr;
+    juce::AudioParameterFloat* chorusCenterDelayMs = nullptr;
+    juce::AudioParameterFloat* chorusFeedbackPercent = nullptr;
+    juce::AudioParameterFloat* chorusMixPercent = nullptr;
 private:
     //==============================================================================
     DSP_Order dspOrder;
