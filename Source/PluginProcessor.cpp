@@ -22,6 +22,9 @@ auto getChorusCenterDelayName() { return juce::String("Chorus Center Delay ms");
 auto getChorusFeedbackName() { return juce::String("Chorus Feedback %"); }
 auto getChorusMixName() { return juce::String("Chorus Mix %"); }
 
+auto getOverdriveSaturationName() { return juce::String("Overdrive Saturation"); }
+
+
 //==============================================================================
 Audio_pluginAudioProcessor::Audio_pluginAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -46,7 +49,9 @@ Audio_pluginAudioProcessor::Audio_pluginAudioProcessor()
         &chorusDepthPercent,
         &chorusCenterDelayMs,
         &chorusFeedbackPercent,
-        &chorusMixPercent
+        &chorusMixPercent,
+
+        &overdriveSaturation
     };
 
     auto floatNameFuncs = std::array{
@@ -60,7 +65,9 @@ Audio_pluginAudioProcessor::Audio_pluginAudioProcessor()
         &getChorusDepthName,
         &getChorusCenterDelayName,
         &getChorusFeedbackName,
-        &getChorusMixName
+        &getChorusMixName,
+
+        &getOverdriveSaturationName,
     };
 
     for (size_t i = 0; i < floatParams.size(); ++i) {
@@ -285,20 +292,29 @@ Audio_pluginAudioProcessor::createParameterLayout() {
         "%"));
 
 
+    /*
+    * overdrive: uses the drive portion of the ladder filter class for now
+    */
+
+    //overdrive: 1 to 100
+    name = getOverdriveSaturationName();
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID(name, versionHint),
+        name,
+        juce::NormalisableRange<float>(1.f, 100.f, 0.1f, 1.f),
+        1.f,
+        ""));
+
+
+
+
+
     return layout;
 }
 
 
-/*
-Chorus:
-Rate: hz
-Deph: 0 to 1
-Center delay: ms(1 to 100)
-Feedback: -1 to 1
-Mix: 0 to 1
-*/
 
-//rate: hz
+
 
 
 void Audio_pluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
