@@ -62,6 +62,7 @@ public:
         Chorus,
         Overdrive, 
         LadderFilter,
+        GeneralFilter,
         END_OF_LIST
     };
 
@@ -108,6 +109,14 @@ public:
     juce::AudioParameterFloat* ladderFilterResonance = nullptr;
     juce::AudioParameterFloat* ladderFilterDrive = nullptr;
 
+    juce::AudioParameterChoice* generalFilterMode = nullptr;
+    juce::AudioParameterFloat* generalFilterFreqHz = nullptr;
+    juce::AudioParameterFloat* generalFilterQuality = nullptr;
+    juce::AudioParameterFloat* generalFilterGain = nullptr;
+
+
+
+
 private:
     //==============================================================================
     DSP_Order dspOrder;
@@ -130,6 +139,7 @@ private:
     DSP_Choice < juce::dsp::Phaser<float>> phaser;
     DSP_Choice<juce::dsp::Chorus<float>> chorus;
     DSP_Choice<juce::dsp::LadderFilter<float>> overdrive, ladderfilter;
+    DSP_Choice<juce::dsp::IIR::Filter<float>> generalFilter;
 
     using DSP_Pointers = std::array<juce::dsp::ProcessorBase*, static_cast<size_t>(DSP_OPTION::END_OF_LIST)>;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Audio_pluginAudioProcessor)
