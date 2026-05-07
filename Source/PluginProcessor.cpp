@@ -214,8 +214,26 @@ void Audio_pluginAudioProcessor::changeProgramName (int index, const juce::Strin
 //==============================================================================
 void Audio_pluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
+    juce::dsp::ProcessSpec spec;
+    spec.sampleRate = sampleRate;
+    spec.maximumBlockSize = samplesPerBlock;
+    spec.numChannels = getTotalNumInputChannels();
+
+    std::vector<juce::dsp::ProcessorBase*> dsp
+    {
+        &phaser,
+        &chorus,
+        &overdrive,
+        &ladderfilter,
+        &generalFilter
+    };
+
+
+    for(auto p: dsp)
+    {
+        p->prepare(spec);
+        p->reset();
+    }
 }
 
 void Audio_pluginAudioProcessor::releaseResources()
@@ -479,9 +497,9 @@ void Audio_pluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    //TO DO[DONE]: Add apvts
-    //TO DO: create audio param for all dps choices
-    //TO DO: update dsp for audio params
+    //[DONE]: Add apvts
+    //[DONE]: create audio param for all dps choices
+    //[DONE]: update dsp for audio params
     //TO DO: save/load settings
     //TO DO: save/load dps order
     //TO DO: Drag to reorder guid
