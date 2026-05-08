@@ -500,7 +500,7 @@ void Audio_pluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     //[DONE]: Add apvts
     //[DONE]: create audio param for all dps choices
     //[DONE]: update dsp for audio params
-    //TO DO: save/load settings
+    //[DONE]: save/load settings
     //TO DO: save/load dps order
     //TO DO: Drag to reorder guid
     //TO DO: metering
@@ -522,7 +522,7 @@ void Audio_pluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     if (newDSPOrder != DSP_Order()) 
         dspOrder = newDSPOrder;
     
-    DSP_Pointers dspPointers;
+    DSP_Pointers dspPointers{};
 
     for (size_t i = 0; i < dspPointers.size(); ++i) {
         switch (dspOrder[i]) {
@@ -550,7 +550,7 @@ void Audio_pluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
     //process and create an audio block
     auto block = juce::dsp::AudioBlock<float>(buffer);
-    auto context = juce::dsp::ProcessContextReplacing<float>(block); //fail 
+    auto context = juce::dsp::ProcessContextReplacing<float>(block);
 
     for (size_t i = 0; i < dspPointers.size(); ++i) {
         if (dspPointers[i] != nullptr) {
@@ -568,7 +568,8 @@ bool Audio_pluginAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* Audio_pluginAudioProcessor::createEditor()
 {
-    return new Audio_pluginAudioProcessorEditor (*this);
+   // return new Audio_pluginAudioProcessorEditor (*this);
+    return new juce::GenericAudioProcessorEditor(*this);
 }
 
 //==============================================================================
@@ -577,12 +578,21 @@ void Audio_pluginAudioProcessor::getStateInformation (juce::MemoryBlock& destDat
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
+
+    juce::MemoryOutputStream mos(destData, false);
+        apvts.state.writeToStream(mos);
+    
 }
 
 void Audio_pluginAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+
+    auto tree = juce::ValueTree::readFromData(data, sizeInBytes);
+    if (tree.isValid()) {
+        apvts.replaceState(tree);
+    }
 }
 
 //==============================================================================
