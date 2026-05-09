@@ -72,6 +72,14 @@ Audio_pluginAudioProcessor::Audio_pluginAudioProcessor()
                        )
 #endif
 {
+
+    dspOrder = { {
+            DSP_OPTION::Phase,
+            DSP_OPTION::Chorus,
+            DSP_OPTION::Overdrive,
+            DSP_OPTION::LadderFilter
+
+    }};
     auto floatParams = std::array{
         &phaserRateHz,
         &phaserCenterFreqHz,
@@ -501,9 +509,10 @@ void Audio_pluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     //[DONE]: create audio param for all dps choices
     //[DONE]: update dsp for audio params
     //TO DO: Update general filter corrections
+    //TO DO: filters are mono, no stereo
     //TO DO: add smoothers for all param updates 
     //[DONE]: save/load settings
-    //TO DO: save/load dps order
+    //[DONE]: save/load dps order
     //TO DO: Drag to reorder guid
     //TO DO: metering
     //TO DO: preparing all dsp 
@@ -543,7 +552,8 @@ void Audio_pluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     if (newDSPOrder != DSP_Order()) 
         dspOrder = newDSPOrder;
     
-    DSP_Pointers dspPointers{};
+    DSP_Pointers dspPointers;
+    dspPointers.fill(nullptr);
 
     for (size_t i = 0; i < dspPointers.size(); ++i) {
         switch (dspOrder[i]) {
@@ -589,9 +599,56 @@ bool Audio_pluginAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* Audio_pluginAudioProcessor::createEditor()
 {
-   // return new Audio_pluginAudioProcessorEditor (*this);
-    return new juce::GenericAudioProcessorEditor(*this);
+    return new Audio_pluginAudioProcessorEditor (*this);
+   // return new juce::GenericAudioProcessorEditor(*this);
 }
+
+
+template<>
+struct juce::VariantConverter<Audio_pluginAudioProcessor::DSP_Order> {
+
+    static Audio_pluginAudioProcessor::DSP_Order fromVar(const juce::var& v) {
+        using T = Audio_pluginAudioProcessor::DSP_Order;
+        T dspOrder;
+
+        jassert(v.isBinaryData());
+
+        if (v.isBinaryData() == false) {
+            dspOrder.fill(Audio_pluginAudioProcessor::DSP_OPTION::END_OF_LIST);
+        }
+        else {
+            auto mb = *v.getBinaryData();
+            juce::MemoryInputStream mis(mb, false);
+            std::vector<int> arr;
+            while (!mis.isExhausted()) {
+                arr.push_back(mis.readInt());
+            }
+
+            jassert(arr.size() == dspOrder.size());
+            for (size_t i = 0; i < dspOrder.size(); ++i) {
+                dspOrder[i] = static_cast<Audio_pluginAudioProcessor::DSP_OPTION>(arr[i]);
+            }
+        }
+
+        return dspOrder;
+
+    }
+    
+    static juce::var toVar(const Audio_pluginAudioProcessor::DSP_Order& t) {
+        juce::MemoryBlock mb; 
+        {
+            juce::MemoryOutputStream mos(mb, false);
+
+            for (const auto& v : t) {
+                mos.writeInt(static_cast<int> (v));
+            }
+        }
+
+        return mb;
+    }
+
+
+};
 
 //==============================================================================
 void Audio_pluginAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
@@ -599,6 +656,9 @@ void Audio_pluginAudioProcessor::getStateInformation (juce::MemoryBlock& destDat
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
+    apvts.state.setProperty("dspOrder",
+                            juce::VariantConverter<Audio_pluginAudioProcessor::DSP_Order>::toVar(dspOrder),
+                            nullptr);
 
     juce::MemoryOutputStream mos(destData, false);
         apvts.state.writeToStream(mos);
@@ -613,6 +673,15 @@ void Audio_pluginAudioProcessor::setStateInformation (const void* data, int size
     auto tree = juce::ValueTree::readFromData(data, sizeInBytes);
     if (tree.isValid()) {
         apvts.replaceState(tree);
+
+        if (apvts.state.hasProperty("dspOrder")) {
+            auto order = 
+                juce::VariantConverter<Audio_pluginAudioProcessor::DSP_Order>::fromVar(apvts.state.getProperty("dspOrder"));
+            dspOrderFifo.push(order);
+        }
+
+        DBG(apvts.state.toXmlString());
+
     }
 }
 
