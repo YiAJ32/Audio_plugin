@@ -134,12 +134,8 @@ Audio_pluginAudioProcessor::Audio_pluginAudioProcessor()
 
     };
 
-    for (size_t i = 0; i < floatParams.size(); ++i) {
-        auto ptrToParamPtr = floatParams[i];
-        *ptrToParamPtr = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(floatNameFuncs[i]()));
-        jassert(*ptrToParamPtr != nullptr);
-    }
-
+ 
+    initCashedParams<juce::AudioParameterFloat*>(floatParams, floatNameFuncs);
     auto choiceParams = std::array{
         &ladderFilterMode,
         &generalFilterMode
@@ -150,12 +146,7 @@ Audio_pluginAudioProcessor::Audio_pluginAudioProcessor()
         &getGeneralFilterModeName
     };
 
-    for (size_t i = 0; i < choiceParams.size(); ++i) {
-        auto ptrToParamPtr = choiceParams[i];
-        *ptrToParamPtr = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter(choiceNameFuncs[i]()));
-        jassert(*ptrToParamPtr != nullptr);
-    }
-
+    initCashedParams<juce::AudioParameterChoice*>(choiceParams, choiceNameFuncs);
 
     auto bypassParams = std::array{
         &phaserBypass,
@@ -173,13 +164,9 @@ Audio_pluginAudioProcessor::Audio_pluginAudioProcessor()
      &getGeneralFilterBypassName
     };
 
-    for (size_t i = 0; i < bypassParams.size(); ++i) {
-        auto ptrToParamPtr = bypassParams[i];
-        *ptrToParamPtr = dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter(bypassNameFuncs[i]()));
-        jassert(*ptrToParamPtr != nullptr);
-    }
 
 
+    initCashedParams<juce::AudioParameterBool*>(bypassParams, bypassNameFuncs);
 }
 
 Audio_pluginAudioProcessor::~Audio_pluginAudioProcessor()
