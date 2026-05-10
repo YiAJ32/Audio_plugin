@@ -616,24 +616,29 @@ void Audio_pluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
         dspOrder = newDSPOrder;
     
     DSP_Pointers dspPointers;
-    dspPointers.fill(nullptr);
+    dspPointers.fill({});
 
     for (size_t i = 0; i < dspPointers.size(); ++i) {
         switch (dspOrder[i]) {
         case DSP_OPTION::Phase:
-            dspPointers[i] = &phaser;
+            dspPointers[i].processor = &phaser;
+            dspPointers[i].bypass = phaserBypass->get();
             break;
         case DSP_OPTION::Chorus:
-            dspPointers[i] = &chorus;
+            dspPointers[i].processor = &chorus;
+            dspPointers[i].bypass = chorusBypass->get();
             break;
         case DSP_OPTION::Overdrive:
-            dspPointers[i] = &overdrive;
+            dspPointers[i].processor = &overdrive;
+            dspPointers[i].bypass = overdriveBypass->get();
             break;
         case DSP_OPTION::LadderFilter:
-            dspPointers[i] = &ladderfilter;
+            dspPointers[i].processor = &ladderfilter;
+            dspPointers[i].bypass = ladderFilterBypass->get();
             break;
         case DSP_OPTION::GeneralFilter:
-            dspPointers[i] = &generalFilter;
+            dspPointers[i].processor = &generalFilter;
+            dspPointers[i].bypass = generalFilterBypass->get();
             break;
         case DSP_OPTION::END_OF_LIST:
             jassertfalse;
@@ -647,8 +652,9 @@ void Audio_pluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     auto context = juce::dsp::ProcessContextReplacing<float>(block);
 
     for (size_t i = 0; i < dspPointers.size(); ++i) {
-        if (dspPointers[i] != nullptr) {
-            dspPointers[i]->process(context);
+        if (dspPointers[i].processor != nullptr) {
+            juce::ScopedValueSetter<bool>svs(context.isBypassed, dspPointers[i].bypass);
+            dspPointers[i].processor -> process(context);
         }
     }
 
@@ -662,8 +668,8 @@ bool Audio_pluginAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* Audio_pluginAudioProcessor::createEditor()
 {
-    return new Audio_pluginAudioProcessorEditor (*this);
-   // return new juce::GenericAudioProcessorEditor(*this);
+   //return new Audio_pluginAudioProcessorEditor (*this);
+    return new juce::GenericAudioProcessorEditor(*this);
 }
 
 
