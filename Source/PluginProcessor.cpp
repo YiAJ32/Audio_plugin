@@ -576,6 +576,7 @@ void Audio_pluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     //TO DO: add smoothers for all param updates 
     //[DONE]: save/load settings
     //[DONE]: save/load dps order
+    //[DONE]: bypass dsp
     //TO DO: Drag to reorder guid
     //TO DO: metering
     //TO DO: preparing all dsp 
@@ -609,7 +610,9 @@ void Audio_pluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     auto newDSPOrder = DSP_Order();
 
     while (dspOrderFifo.pull(newDSPOrder)) {
-
+#if VERIFY_BYPASS_FUNCTIONALITY
+        jassertfalse;
+#endif
     }
 
     if (newDSPOrder != DSP_Order()) 
@@ -654,6 +657,19 @@ void Audio_pluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     for (size_t i = 0; i < dspPointers.size(); ++i) {
         if (dspPointers[i].processor != nullptr) {
             juce::ScopedValueSetter<bool>svs(context.isBypassed, dspPointers[i].bypass);
+#if VERIFY_BYPASS_FUNCTIONALITY
+            if (context.isBypassed) {
+                jassertfalse;
+            }
+            if (dspPointers[i].processor == &generalFilter) {
+                continue;
+            }
+#endif
+
+
+          
+
+
             dspPointers[i].processor -> process(context);
         }
     }
@@ -669,7 +685,7 @@ bool Audio_pluginAudioProcessor::hasEditor() const
 juce::AudioProcessorEditor* Audio_pluginAudioProcessor::createEditor()
 {
    //return new Audio_pluginAudioProcessorEditor (*this);
-    return new juce::GenericAudioProcessorEditor(*this);
+   return new juce::GenericAudioProcessorEditor(*this);
 }
 
 
@@ -750,6 +766,19 @@ void Audio_pluginAudioProcessor::setStateInformation (const void* data, int size
         }
 
         DBG(apvts.state.toXmlString());
+
+#if VERIFY_BYPASS_FUNCTIONALITY
+        juce::Timer::callAfterDelay(1000, [this]()
+            {
+                DSP_Order order;
+                order.fill(DSP_OPTION::LadderFilter);
+                order[0] = DSP_OPTION::Chorus;
+
+                chorusBypass->setValueNotifyingHost(1.f);
+                dspOrderFifo.push(order);
+            });
+
+#endif
 
     }
 }

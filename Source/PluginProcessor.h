@@ -150,5 +150,10 @@ private:
     };
 
     using DSP_Pointers = std::array<ProcessState, static_cast<size_t>(DSP_OPTION::END_OF_LIST)>;
+
+#define VERIFY_BYPASS_FUNCTIONALITY false
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Audio_pluginAudioProcessor)
+
+
 };
