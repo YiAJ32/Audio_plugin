@@ -15,7 +15,7 @@ Audio_pluginAudioProcessorEditor::Audio_pluginAudioProcessorEditor (Audio_plugin
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    //NOTE: SAVING FILTERS WORKS SOMETIMES, BETTER CHECK LATER
+
     dspOrderButton.onClick = [this]()
         {
             juce::Random r;
