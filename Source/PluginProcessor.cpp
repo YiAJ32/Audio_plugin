@@ -78,13 +78,9 @@ Audio_pluginAudioProcessor::Audio_pluginAudioProcessor()
 #endif
 {
 
-    dspOrder = { {
-            DSP_OPTION::Phase,
-            DSP_OPTION::Chorus,
-            DSP_OPTION::Overdrive,
-            DSP_OPTION::LadderFilter
-
-    }};
+    for (size_t i = 0; i < static_cast<size_t>(DSP_OPTION::END_OF_LIST); ++i) {
+        dspOrder[i] = static_cast<DSP_OPTION>(i);
+    }
     auto floatParams = std::array{
         &phaserRateHz,
         &phaserCenterFreqHz,
@@ -564,6 +560,79 @@ void Audio_pluginAudioProcessor::MonoChannelDSP::updateDSPFromParams()
     ladderfilter.dsp.setDrive(p.ladderFilterDrive->get());
 
     // TO DO: update general filter coefficients here
+
+    auto sampleRate = p.getSampleRate();
+    auto genMode = p.generalFilterMode->getIndex();
+    auto genHz = p.generalFilterFreqHz->get();
+    auto genQ = p.generalFilterQuality->get();
+    auto genGain = p.generalFilterGain->get();
+
+    bool filterChanged = false;
+    filterChanged |= (filterFreq != genHz);
+    filterChanged |= (filterQ != genQ);
+    filterChanged |= (filterGain != genGain);
+
+    auto updatedMode = static_cast<GeneralFilterMode>(genMode);
+    filterChanged |= (filterMode != updatedMode);
+
+    if (filterChanged)
+    {
+        filterMode = updatedMode;
+        filterFreq = genHz;
+        filterQ = genQ;
+        filterGain = genGain;
+
+        juce::dsp::IIR::Coefficients<float>::Ptr coefficients;
+        switch (filterMode)
+        {
+        case GeneralFilterMode::Peak:
+        {
+            coefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate,
+                filterFreq,
+                filterQ,
+                juce::Decibels::decibelsToGain(filterGain));
+            break;
+        }
+        case GeneralFilterMode::Bandpass:
+        {
+            coefficients = juce::dsp::IIR::Coefficients<float>::makeBandPass(sampleRate,
+                filterFreq,
+                filterQ);
+            break;
+        }
+        case GeneralFilterMode::Notch:
+        {
+            coefficients = juce::dsp::IIR::Coefficients<float>::makeNotch(sampleRate,
+                filterFreq,
+                filterQ);
+            break;
+        }
+        case GeneralFilterMode::Allpass:
+        {
+            coefficients = juce::dsp::IIR::Coefficients<float>::makeAllPass(sampleRate,
+                filterFreq,
+                filterQ);
+            break;
+        }
+        case GeneralFilterMode::END_OF_LIST:
+        {
+            jassertfalse;
+            break;
+        }
+        }
+
+        if (coefficients != nullptr)
+        {
+           /*if( generalFilter.dsp.coefficients->coefficients.size() != coefficients->coefficients.size() )
+               {
+                    jassertfalse;
+              }*/
+
+            *generalFilter.dsp.coefficients = *coefficients;
+            generalFilter.reset();
+        }
+    }
+
 };
 
 
@@ -587,7 +656,7 @@ void Audio_pluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     //[DONE]: create audio param for all dps choices
     //[DONE]: update dsp for audio params
     //[DONE]: bypass params for each dps elements
-    //TO DO: Update general filter corrections
+    //[DONE]: Update general filter coefficients
     //[DONE]: filters are mono, no stereo
     //TO DO: add smoothers for all param updates 
     //[DONE]: save/load settings
