@@ -731,7 +731,7 @@ void Audio_pluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     //[DONE]: bypass params for each dps elements
     //[DONE]: Update general filter coefficients
     //[DONE]: filters are mono, no stereo
-    //TO DO: add smoothers for all param updates 
+    //[DONE]: add smoothers for all param updates 
     //[DONE]: save/load settings
     //[DONE]: save/load dps order
     //[DONE]: bypass dsp
@@ -744,6 +744,9 @@ void Audio_pluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     //TO DO: thread save filtering update
     //TO DO: pre/post filtering
     //TO DO: delay module
+    //TO DO: restore tabs in the gui when loading
+    //TO DO: save/load preset
+    //TO DO: GUI desing for all dsp instances
 
     
     leftChannel.updateDSPFromParams();
@@ -854,8 +857,8 @@ bool Audio_pluginAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* Audio_pluginAudioProcessor::createEditor()
 {
-   //return new Audio_pluginAudioProcessorEditor (*this);
-   return new juce::GenericAudioProcessorEditor(*this);
+   return new Audio_pluginAudioProcessorEditor (*this);
+   //return new juce::GenericAudioProcessorEditor(*this);
 }
 
 
