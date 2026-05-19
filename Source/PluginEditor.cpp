@@ -32,11 +32,49 @@ static juce::String getDspOptionName(Audio_pluginAudioProcessor::DSP_OPTION opti
     return "NO SELECTION";
 }
 
+HorizontalConstrainer::HorizontalConstrainer(std::function<juce::Rectangle<int>()> confinerBoundsGetter,
+    std::function<juce::Rectangle<int>()> confineeBoundsGetter) :
+    boundsToConfineToGetter(std::move(confinerBoundsGetter)),
+    boundsOfConfineeGetter(std::move(confineeBoundsGetter))
+{
+
+}
+
+void HorizontalConstrainer::checkBounds(juce::Rectangle<int>& bounds,
+    const juce::Rectangle<int>& previousBounds,
+    const juce::Rectangle<int>& limits,
+    bool isStretchingTop,
+    bool isStretchingLeft,
+    bool isStretchingBottom,
+    bool isStretchingRight)
+{
+    bounds.setY(previousBounds.getY());
+
+    if (boundsToConfineToGetter != nullptr &&
+        boundsOfConfineeGetter != nullptr)
+    {
+        auto boundsToConfineTo = boundsToConfineToGetter();
+        auto boundsOfConfinee = boundsOfConfineeGetter();
+
+        bounds.setX(juce::jlimit(boundsToConfineTo.getX(),
+            boundsToConfineTo.getRight() - boundsOfConfinee.getWidth(),
+            bounds.getX()));
+    }
+    else
+    {
+        bounds.setX(juce::jlimit(limits.getX(),
+            limits.getY(),
+            bounds.getX()));
+    }
+}
 
 ExtendedTabBarButton::ExtendedTabBarButton(const juce::String& name, juce::TabbedButtonBar& owner) : 
     juce::TabBarButton(name, owner)
 {
+    constrainer = std::make_unique<HorizontalConstrainer>([&owner]() { return owner.getLocalBounds(); },
+        [this]() { return getBounds(); });
 
+     constrainer->setMinimumOnscreenAmounts(0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff);
 }
 
 juce::TabBarButton* ExtendedTabbedButtonBar::createTabButton(const juce::String& tabName, int tabIndex)
