@@ -80,32 +80,116 @@ ExtendedTabBarButton::ExtendedTabBarButton(const juce::String& name, juce::Tabbe
 }
 
 //==============================================================================
-void ExtendedTabBarButton::mouseDown(const juce::MouseEvent& e) {
+void ExtendedTabBarButton::mouseDown(const juce::MouseEvent& e) 
+{
         toFront(true);
         dragger.startDraggingComponent(this, e);
         juce::TabBarButton::mouseDown(e);
-    }
-    void ExtendedTabBarButton::mouseDrag(const juce::MouseEvent& e) {
+}
+void ExtendedTabBarButton::mouseDrag(const juce::MouseEvent& e)
+{
         dragger.dragComponent(this, e, constrainer.get());
-    }
+}
 
 //==============================================================================
  ExtendedTabbedButtonBar::ExtendedTabbedButtonBar() :
     juce::TabbedButtonBar(juce::TabbedButtonBar::Orientation::TabsAtTop) {}
 
 bool ExtendedTabbedButtonBar::isInterestedInDragSource(const SourceDetails& dragSourceDetails)
-{ return false; }
+{
+    if (dynamic_cast<ExtendedTabBarButton*>(dragSourceDetails.sourceComponent.get()))
+        return true;
+    return false; 
+}
 
-void ExtendedTabbedButtonBar::itemDropped(const SourceDetails& dragSourceDetails)  {}
+
+
+void ExtendedTabbedButtonBar::itemDragEnter(const SourceDetails& dragSourceDetails)
+{
+    DBG("ExtendedTabbedButtonBar::itemDragExit");
+    juce::DragAndDropTarget::itemDragEnter(dragSourceDetails);
+
+}
+
+void ExtendedTabbedButtonBar::itemDragExit(const SourceDetails& dragSourceDetails)
+{
+    DBG("ExtendedTabbedButtonBar::itemDragExit");
+    juce::DragAndDropTarget::itemDragExit(dragSourceDetails);
+
+}
+
+void ExtendedTabbedButtonBar::itemDragMove(const SourceDetails& dragSourceDetails)
+{
+    if (auto tabButtonBeingDrag = dynamic_cast<ExtendedTabBarButton*>(dragSourceDetails.sourceComponent.get() )) {
+        auto numTabs = getNumTabs();
+        auto tabs = juce::Array<juce::TabBarButton*>();
+        tabs.resize(numTabs);
+        for (int i = 0; i < numTabs; ++i) {
+            tabs.getReference(i) = getTabButton(i);
+        }
+
+        auto idx = tabs.indexOf(tabButtonBeingDrag);
+        if (idx == -1) {
+            DBG("Failed to find drag tab in the list of tabs");
+            jassertfalse;
+            return;
+        }
+
+        auto previousTabIndex = idx - 1;
+        auto nextTabIndex = idx + 1;
+        auto previousTab = getTabButton(previousTabIndex);
+        auto nextTab = getTabButton(nextTabIndex);
+
+        if (previousTab == nullptr && nextTab != nullptr) {
+
+            if (tabButtonBeingDrag->getX() > nextTab->getBounds().getCentreX()) {
+                moveTab(idx, nextTabIndex);
+            }
+        }
+        else if (previousTab != nullptr && nextTab == nullptr) {
+
+            if (tabButtonBeingDrag->getX() < previousTab->getBounds().getCentreX()) {
+                moveTab(idx, previousTabIndex);
+            }
+        }
+        else {
+            if (tabButtonBeingDrag->getX() > nextTab->getBounds().getCentreX()) {
+                moveTab(idx, nextTabIndex);
+            }else if (tabButtonBeingDrag->getX() < previousTab->getBounds().getCentreX()) {
+                moveTab(idx, previousTabIndex);
+            }
+        }
+
+    }
+
+}
+
+void ExtendedTabbedButtonBar::itemDropped(const SourceDetails& dragSourceDetails)  
+{
+
+}
+
+void ExtendedTabbedButtonBar::mouseDown(const juce::MouseEvent& e)
+{
+    DBG("ExtendedTabbedButtonBar::mouseDown");
+    if (auto tabButtonBeingDrag = dynamic_cast<ExtendedTabBarButton*>(e.originalComponent)) {
+        startDragging(tabButtonBeingDrag->TabBarButton::getTitle(), tabButtonBeingDrag);
+    }
+}
 
 juce::TabBarButton* ExtendedTabbedButtonBar::createTabButton(const juce::String& tabName, int tabIndex)
 {
-    return new ExtendedTabBarButton(tabName, *this);
+    auto etbb = std::make_unique<ExtendedTabBarButton>(tabName, *this);
+
+    etbb->addMouseListener(this, false);
+    return etbb.release();
+
 }
 //==============================================================================
 Audio_pluginAudioProcessorEditor::Audio_pluginAudioProcessorEditor (Audio_pluginAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
+
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
 
