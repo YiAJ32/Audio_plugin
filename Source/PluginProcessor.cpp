@@ -747,7 +747,7 @@ void Audio_pluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     //TO DO: restore tabs in the gui when loading
     //TO DO: save/load preset
     //TO DO: GUI desing for all dsp instances
-    //TO DO: snapped drag the tab to the right position
+    //[DONE]: snapped drag the tab to the right position
     //TO DO: hide drag tab img or prevent it to move
 
     
