@@ -32,6 +32,23 @@ static juce::String getDspOptionName(Audio_pluginAudioProcessor::DSP_OPTION opti
     return "NO SELECTION";
 }
 
+static Audio_pluginAudioProcessor::DSP_OPTION getDSPOptionFromName(juce::String name)
+{
+
+    if (name == "PHASE")
+        return Audio_pluginAudioProcessor::DSP_OPTION::Phase;
+    if (name == "CHORUS")
+        return Audio_pluginAudioProcessor::DSP_OPTION::Chorus;
+    if (name == "OVERDRIVE")
+        return Audio_pluginAudioProcessor::DSP_OPTION::Overdrive;
+    if (name == "LADDERFILTER")
+        return Audio_pluginAudioProcessor::DSP_OPTION::LadderFilter;
+    if (name == "GEN FILTER")
+        return Audio_pluginAudioProcessor::DSP_OPTION::GeneralFilter;
+
+    return Audio_pluginAudioProcessor::DSP_OPTION::END_OF_LIST;
+}
+
 HorizontalConstrainer::HorizontalConstrainer(std::function<juce::Rectangle<int>()> confinerBoundsGetter,
     std::function<juce::Rectangle<int>()> confineeBoundsGetter) :
     boundsToConfineToGetter(std::move(confinerBoundsGetter)),
@@ -68,8 +85,9 @@ void HorizontalConstrainer::checkBounds(juce::Rectangle<int>& bounds,
     }
 }
 
-ExtendedTabBarButton::ExtendedTabBarButton(const juce::String& name, juce::TabbedButtonBar& owner) : 
-    juce::TabBarButton(name, owner)
+ExtendedTabBarButton::ExtendedTabBarButton(const juce::String& name, juce::TabbedButtonBar& owner,
+    Audio_pluginAudioProcessor::DSP_OPTION dspOption) : 
+    juce::TabBarButton(name, owner), option(dspOption)
 {
     constrainer = std::make_unique<HorizontalConstrainer>([&owner]() { return owner.getLocalBounds(); },
         [this]() { return getBounds(); });
@@ -187,9 +205,27 @@ void ExtendedTabbedButtonBar::itemDragMove(const SourceDetails& dragSourceDetail
 
 }
 
-void ExtendedTabbedButtonBar::itemDropped(const SourceDetails& dragSourceDetails)  
+void ExtendedTabbedButtonBar::itemDropped(const SourceDetails& dragSourceDetails)
 {
     resized();
+
+    auto tabs = getTabs();
+    Audio_pluginAudioProcessor::DSP_Order newOrder;
+    jassert(tabs.size() == newOrder.size());
+
+    for (size_t i = 0; i < tabs.size(); ++i) {
+        auto tab = tabs[static_cast<int>(i)];
+
+        if (auto* etbb = dynamic_cast<ExtendedTabBarButton*>(tab)) {
+            newOrder[i] = etbb->getOption();
+        }
+    }
+
+    listeners.call([newOrder](Listener& l)
+        {
+            l.tabOrderChange(newOrder);
+        });
+   
 }
 
 void ExtendedTabbedButtonBar::mouseDown(const juce::MouseEvent& e)
@@ -202,11 +238,22 @@ void ExtendedTabbedButtonBar::mouseDown(const juce::MouseEvent& e)
 
 juce::TabBarButton* ExtendedTabbedButtonBar::createTabButton(const juce::String& tabName, int tabIndex)
 {
-    auto etbb = std::make_unique<ExtendedTabBarButton>(tabName, *this);
+    auto dspOption = getDSPOptionFromName(tabName);
+    auto etbb = std::make_unique<ExtendedTabBarButton>(tabName, *this, dspOption);
 
     etbb->addMouseListener(this, false);
     return etbb.release();
 
+}
+
+void ExtendedTabbedButtonBar::addListener(Listener *l)
+{
+    listeners.add(l);
+}
+
+void ExtendedTabbedButtonBar::removeListener(Listener *l)
+{
+    listeners.remove(l);
 }
 //==============================================================================
 Audio_pluginAudioProcessorEditor::Audio_pluginAudioProcessorEditor (Audio_pluginAudioProcessor& p)
@@ -242,11 +289,14 @@ Audio_pluginAudioProcessorEditor::Audio_pluginAudioProcessorEditor (Audio_plugin
 
     addAndMakeVisible(dspOrderButton);
     addAndMakeVisible(tabbedComponent);
+
+    tabbedComponent.addListener(this);
     setSize (400, 300);
 }
 
 Audio_pluginAudioProcessorEditor::~Audio_pluginAudioProcessorEditor()
 {
+    tabbedComponent.removeListener(this);
 }
 
 //==============================================================================
@@ -267,4 +317,9 @@ void Audio_pluginAudioProcessorEditor::resized()
     bounds.removeFromTop(10);
     tabbedComponent.setBounds(bounds.withHeight(30));
 
+}
+
+void Audio_pluginAudioProcessorEditor::tabOrderChange(Audio_pluginAudioProcessor::DSP_Order newOrder) 
+{
+    audioProcessor.dspOrderFifo.push(newOrder);
 }
