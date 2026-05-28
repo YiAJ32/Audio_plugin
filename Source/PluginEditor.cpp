@@ -10,7 +10,7 @@
 #include "PluginEditor.h"
 
 
-static juce::String getDspOptionName(Audio_pluginAudioProcessor::DSP_OPTION option)
+static juce::String getNameFromDspOption(Audio_pluginAudioProcessor::DSP_OPTION option)
 {
     switch (option)
     {
@@ -97,6 +97,13 @@ ExtendedTabBarButton::ExtendedTabBarButton(const juce::String& name, juce::Tabbe
 
 }
 
+int ExtendedTabBarButton::getBestTabLength(int depth)
+{
+    auto bestWidth = getLookAndFeel().getTabButtonBestWidth(*this, depth);
+    auto& bar = getTabbedButtonBar();
+
+    return juce::jmax(bestWidth, bar.getWidth() / bar.getNumTabs());
+}
 //==============================================================================
 void ExtendedTabBarButton::mouseDown(const juce::MouseEvent& e) 
 {
@@ -284,7 +291,7 @@ Audio_pluginAudioProcessorEditor::Audio_pluginAudioProcessorEditor (Audio_plugin
             for(auto& v : dspOrder) {
                 auto entry = r.nextInt(range);
                 v = static_cast<Audio_pluginAudioProcessor::DSP_OPTION>(entry);
-                tabbedComponent.addTab(getDspOptionName(v), juce::Colours::white, -1);
+                tabbedComponent.addTab(getNameFromDspOption(v), juce::Colours::white, -1);
             }
 
             DBG(juce::Base64::toBase64(dspOrder.data(),dspOrder.size() ));
@@ -299,7 +306,7 @@ Audio_pluginAudioProcessorEditor::Audio_pluginAudioProcessorEditor (Audio_plugin
     addAndMakeVisible(tabbedComponent);
 
     tabbedComponent.addListener(this);
-    setSize (400, 300);
+    setSize (600, 400);
 }
 
 Audio_pluginAudioProcessorEditor::~Audio_pluginAudioProcessorEditor()

@@ -748,7 +748,7 @@ void Audio_pluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     //TO DO: save/load preset
     //TO DO: GUI desing for all dsp instances
     //[DONE]: snapped drag the tab to the right position
-    //TO DO: hide drag tab img or prevent it to move
+    //[DONE]: hide drag tab img or prevent it to move
 
     
     leftChannel.updateDSPFromParams();
