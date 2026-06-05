@@ -306,6 +306,7 @@ Audio_pluginAudioProcessorEditor::Audio_pluginAudioProcessorEditor (Audio_plugin
     addAndMakeVisible(tabbedComponent);
 
     tabbedComponent.addListener(this);
+    startTimerHz(30);
     setSize (600, 400);
 }
 
@@ -336,5 +337,35 @@ void Audio_pluginAudioProcessorEditor::resized()
 
 void Audio_pluginAudioProcessorEditor::tabOrderChange(Audio_pluginAudioProcessor::DSP_Order newOrder) 
 {
+    audioProcessor.dspOrderFifo.push(newOrder);
+}
+
+
+void Audio_pluginAudioProcessorEditor::timerCallback()
+{
+    if (audioProcessor.restoreDspOrderFifo.getNumAvailableForReading() == 0)
+        return;
+    using T = Audio_pluginAudioProcessor::DSP_Order;
+    T newOrder;
+    newOrder.fill(Audio_pluginAudioProcessor::DSP_OPTION::END_OF_LIST);
+    auto empty = newOrder;
+    while (audioProcessor.restoreDspOrderFifo.pull(newOrder)) 
+    {
+
+    }
+
+    if (newOrder != empty)
+    {
+        addTabsFromDSPOrder(newOrder);
+    }
+}
+
+void Audio_pluginAudioProcessorEditor::addTabsFromDSPOrder(Audio_pluginAudioProcessor::DSP_Order newOrder)
+{
+    tabbedComponent.clearTabs();
+    for (auto v : newOrder)
+    {
+        tabbedComponent.addTab(getNameFromDspOption(v), juce::Colours::white, -1);
+    }
     audioProcessor.dspOrderFifo.push(newOrder);
 }

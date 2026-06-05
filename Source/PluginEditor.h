@@ -82,7 +82,9 @@ private:
 //==============================================================================
 /**
 */
-class Audio_pluginAudioProcessorEditor  : public juce::AudioProcessorEditor, ExtendedTabbedButtonBar::Listener
+class Audio_pluginAudioProcessorEditor  : public juce::AudioProcessorEditor, 
+    ExtendedTabbedButtonBar::Listener,
+    juce::Timer
 {
 public:
     Audio_pluginAudioProcessorEditor (Audio_pluginAudioProcessor&);
@@ -92,6 +94,7 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
     void tabOrderChange(Audio_pluginAudioProcessor::DSP_Order newOrder) override;
+    void timerCallback() override;
 
 private:
     // This reference is provided as a quick way for your editor to
@@ -101,5 +104,6 @@ private:
 
     ExtendedTabbedButtonBar tabbedComponent;
 
+    void addTabsFromDSPOrder(Audio_pluginAudioProcessor::DSP_Order);
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Audio_pluginAudioProcessorEditor)
 };
