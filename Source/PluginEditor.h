@@ -100,7 +100,7 @@ private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     Audio_pluginAudioProcessor& audioProcessor;
-    juce::TextButton dspOrderButton{ "dsp order" };
+    
 
     ExtendedTabbedButtonBar tabbedComponent;
 
