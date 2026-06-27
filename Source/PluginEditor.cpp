@@ -195,26 +195,28 @@ void ExtendedTabbedButtonBar::itemDragMove(const SourceDetails& dragSourceDetail
         auto previousTab = getTabButton(previousTabIndex);
         auto nextTab = getTabButton(nextTabIndex);
 
+        auto centerX = tabButtonBeingDrag->getBounds().getCentreX();
         if (previousTab == nullptr && nextTab != nullptr) {
 
-            if (tabButtonBeingDrag->getX() > nextTab->getBounds().getCentreX()) {
+            if (centerX > nextTab->getX()) {
                 moveTab(idx, nextTabIndex);
             }
         }
         else if (previousTab != nullptr && nextTab == nullptr) {
 
-            if (tabButtonBeingDrag->getX() < previousTab->getBounds().getCentreX()) {
+            if (centerX < previousTab->getX()) {
                 moveTab(idx, previousTabIndex);
             }
         }
         else {
-            if (tabButtonBeingDrag->getX() > nextTab->getBounds().getCentreX()) {
+            if (centerX > nextTab->getX()) {
                 moveTab(idx, nextTabIndex);
-            }else if (tabButtonBeingDrag->getX() < previousTab->getBounds().getCentreX()) {
+            }else if (centerX < previousTab->getRight()) {
                 moveTab(idx, previousTabIndex);
             }
         }
 
+        tabButtonBeingDrag->toFront(true);
     }
 
 }

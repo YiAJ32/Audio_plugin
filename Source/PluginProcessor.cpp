@@ -738,7 +738,7 @@ void Audio_pluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     //[DONE]: save/load settings
     //[DONE]: save/load dps order
     //[DONE]: bypass dsp
-    //TO DO: Drag to reorder guid
+    //[DONE]: Drag to reorder guid
     //TO DO: metering
     //TO DO: preparing all dsp 
     //TO DO: web/dry knob
