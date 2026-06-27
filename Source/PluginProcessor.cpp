@@ -81,6 +81,9 @@ Audio_pluginAudioProcessor::Audio_pluginAudioProcessor()
     for (size_t i = 0; i < static_cast<size_t>(DSP_OPTION::END_OF_LIST); ++i) {
         dspOrder[i] = static_cast<DSP_OPTION>(i);
     }
+
+    restoreDspOrderFifo.push(dspOrder);
+
     auto floatParams = std::array{
         &phaserRateHz,
         &phaserCenterFreqHz,
@@ -744,7 +747,7 @@ void Audio_pluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     //TO DO: thread save filtering update
     //TO DO: pre/post filtering
     //TO DO: delay module
-    //TO DO: restore tabs in the gui when loading
+    //[DONE]: restore tabs in the gui when loading
     //TO DO: save/load preset
     //TO DO: GUI desing for all dsp instances
     //[DONE]: snapped drag the tab to the right position

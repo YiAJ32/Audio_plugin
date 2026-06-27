@@ -291,10 +291,12 @@ Audio_pluginAudioProcessorEditor::Audio_pluginAudioProcessorEditor (Audio_plugin
             for(auto& v : dspOrder) {
                 auto entry = r.nextInt(range);
                 v = static_cast<Audio_pluginAudioProcessor::DSP_OPTION>(entry);
-                tabbedComponent.addTab(getNameFromDspOption(v), juce::Colours::white, -1);
+                auto name = getNameFromDspOption(v);
+                DBG("creating" << name);
+                tabbedComponent.addTab(name, juce::Colours::white, -1);
             }
 
-            DBG(juce::Base64::toBase64(dspOrder.data(),dspOrder.size() ));
+           // DBG(juce::Base64::toBase64(dspOrder.data(),dspOrder.size() ));
             
             
             audioProcessor.dspOrderFifo.push(dspOrder);
