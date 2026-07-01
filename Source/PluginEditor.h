@@ -79,6 +79,19 @@ private:
     Audio_pluginAudioProcessor::DSP_OPTION option;
 };
 
+
+struct DSP_GUI : juce::Component 
+{
+    DSP_GUI(){};
+    void resized()  override {};
+
+    void paint(juce::Graphics& g) override { g.fillAll(juce::Colours::red); };
+    void rebuildInterface(std::vector < juce::RangedAudioParameter* > params);
+    
+    std::vector < std::unique_ptr < juce::Slider> > sliders;
+    std::vector < std::unique_ptr < juce::AudioProcessorValueTreeState::SliderAttachment> > attachements;
+};
+
 //==============================================================================
 /**
 */
@@ -100,7 +113,7 @@ private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     Audio_pluginAudioProcessor& audioProcessor;
-    
+    DSP_GUI dspGUI;
 
     ExtendedTabbedButtonBar tabbedComponent;
 

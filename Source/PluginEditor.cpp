@@ -281,7 +281,7 @@ Audio_pluginAudioProcessorEditor::Audio_pluginAudioProcessorEditor (Audio_plugin
     // editor's size to whatever you need it to be.
 
     addAndMakeVisible(tabbedComponent);
-
+    addAndMakeVisible(dspGUI);
     tabbedComponent.addListener(this);
     startTimerHz(30);
     setSize (600, 400);
@@ -307,8 +307,8 @@ void Audio_pluginAudioProcessorEditor::resized()
 {
     auto bounds = getLocalBounds();
     bounds.removeFromTop(10);
-    tabbedComponent.setBounds(bounds.withHeight(30));
-
+    tabbedComponent.setBounds(bounds.removeFromTop(30));
+    dspGUI.setBounds(bounds);
 }
 
 void Audio_pluginAudioProcessorEditor::tabOrderChange(Audio_pluginAudioProcessor::DSP_Order newOrder) 
