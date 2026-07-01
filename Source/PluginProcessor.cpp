@@ -711,7 +711,72 @@ void Audio_pluginAudioProcessor::MonoChannelDSP::updateDSPFromParams()
 
 };
 
+std::vector<juce::RangedAudioParameter*> Audio_pluginAudioProcessor::getParamsForOption(DSP_OPTION option)
+{
+    switch (option) 
+    {
+        case DSP_OPTION::Phase:
+        {
+            return
+            {
+                phaserRateHz,
+                phaserCenterFreqHz,
+                phaserDepthPercent,
+                phaserFeedbackPercent,
+                phaserMixPercent,
+                phaserBypass
+            };
+        }
+        case DSP_OPTION::Chorus:
+        {
+            return
+            {
+                chorusRateHz,
+                chorusDepthPercent,
+                chorusCenterDelayMs,
+                chorusFeedbackPercent,
+                chorusMixPercent,
+                chorusBypass
+            };
+        }
+        case DSP_OPTION::Overdrive:
+        {
+            return
+            {
+                overdriveSaturation,
+                overdriveBypass
+            };
+        }
+        case DSP_OPTION::LadderFilter:
+        {
+            return
+            {
+                ladderFilterMode,
+                ladderFilterCutoff,
+                ladderFilterResonance,
+                ladderFilterDrive, 
+                ladderFilterBypass
+            };
+        }
+        case DSP_OPTION::GeneralFilter:
+        {
+            return
+            {
+                generalFilterMode,
+                generalFilterFreqHz,
+                generalFilterQuality,
+                generalFilterGain,
+                generalFilterBypass
+            };
+        }
+        case DSP_OPTION::END_OF_LIST:
+            break;
+    }
 
+        jassertfalse;
+        return { };
+    
+}
 
 void Audio_pluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
