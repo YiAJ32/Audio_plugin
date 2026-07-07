@@ -273,6 +273,102 @@ void ExtendedTabbedButtonBar::removeListener(Listener *l)
     listeners.remove(l);
 }
 //==============================================================================
+
+
+void DSP_GUI::resized() 
+{
+    auto bounds = getLocalBounds();
+    if (buttons.empty() == false)
+    {
+        auto buttonArea = bounds.removeFromTop(30);
+        auto w = buttonArea.getWidth() / buttons.size();
+
+        for (auto& button : buttons)
+        {
+            button->setBounds(buttonArea.removeFromLeft(static_cast<int> (w)));
+        }
+    }
+
+    if (comboBoxes.empty() == false)
+    {
+        auto comboBoxArea = bounds.removeFromLeft(bounds.getWidth()/4);
+        auto h = juce::jmin(comboBoxArea.getHeight() / static_cast<int>(comboBoxes.size()),30);
+
+        for (auto& cb : comboBoxes)
+        {
+            cb->setBounds(comboBoxArea.removeFromTop(static_cast<int> (h)));
+        }
+    }
+
+    if (sliders.empty() == false)
+    {
+
+        auto w = bounds.getWidth() / sliders.size();
+
+        for (auto& slider : sliders)
+        {
+            slider->setBounds(bounds.removeFromLeft(static_cast<int> (w)));
+        }
+    }
+};
+
+void DSP_GUI::paint(juce::Graphics& g)
+{
+    g.fillAll(juce::Colours::black); 
+};
+
+void DSP_GUI::rebuildInterface(std::vector < juce::RangedAudioParameter* > params)
+{
+    sliderAttachements.clear();
+    comboBoxAttachements.clear();
+    buttonAttachements.clear();
+
+    sliders.clear();
+    comboBoxes.clear();
+    buttons.clear();
+
+    for (size_t i = 0; i < params.size(); ++i)
+    {
+        auto p = params[i];
+
+        if (auto* choice = dynamic_cast<juce::AudioParameterChoice*>(p))
+        {
+            comboBoxes.push_back(std::make_unique<juce::ComboBox>());
+            auto& cb = *comboBoxes.back();
+            cb.addItemList(choice->choices,1);
+
+            comboBoxAttachements.push_back(std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>
+            (processor.apvts,p->getName(100),cb));
+        }
+        else if (auto* toggle = dynamic_cast<juce::AudioParameterBool*>(p))
+        {
+            buttons.push_back(std::make_unique<juce::ToggleButton>("Bypass"));
+            auto& btn = *buttons.back();
+            buttonAttachements.push_back(std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>
+                (processor.apvts, p->getName(100), btn));
+        }
+        else
+        {
+            sliders.push_back(std::make_unique<juce::Slider>());
+            auto& slider = *sliders.back();
+            slider.setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
+            sliderAttachements.push_back(std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>
+                (processor.apvts, p->getName(100), slider));
+        }
+    }
+
+    for (auto& slider : sliders)
+        addAndMakeVisible(slider.get());
+
+    for (auto& cb : comboBoxes)
+        addAndMakeVisible(cb.get());
+
+    for (auto& btn : buttons)
+        addAndMakeVisible(btn.get());
+
+    resized();
+}
+
 Audio_pluginAudioProcessorEditor::Audio_pluginAudioProcessorEditor (Audio_pluginAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
@@ -313,6 +409,7 @@ void Audio_pluginAudioProcessorEditor::resized()
 
 void Audio_pluginAudioProcessorEditor::tabOrderChange(Audio_pluginAudioProcessor::DSP_Order newOrder) 
 {
+    rebuildInterface();
     audioProcessor.dspOrderFifo.push(newOrder);
 }
 
@@ -343,5 +440,20 @@ void Audio_pluginAudioProcessorEditor::addTabsFromDSPOrder(Audio_pluginAudioProc
     {
         tabbedComponent.addTab(getNameFromDspOption(v), juce::Colours::white, -1);
     }
+
+    rebuildInterface();
     audioProcessor.dspOrderFifo.push(newOrder);
+}
+
+void Audio_pluginAudioProcessorEditor::rebuildInterface()
+{
+    auto currentTabIndex = tabbedComponent.getCurrentTabIndex();
+    auto currentTab = tabbedComponent.getTabButton(currentTabIndex);
+    if (auto etbb = dynamic_cast<ExtendedTabBarButton*>(currentTab))
+    {
+        auto option = etbb->getOption();
+        auto params = audioProcessor.getParamsForOption(option);
+        jassert(params.empty() == false);
+        dspGUI.rebuildInterface(params);
+    }
 }
