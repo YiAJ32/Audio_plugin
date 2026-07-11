@@ -377,7 +377,7 @@ Audio_pluginAudioProcessorEditor::Audio_pluginAudioProcessorEditor (Audio_plugin
 
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-
+    setLookAndFeel(&lookAndFeel);
     addAndMakeVisible(tabbedComponent);
     addAndMakeVisible(dspGUI);
     tabbedComponent.addListener(this);
@@ -387,6 +387,7 @@ Audio_pluginAudioProcessorEditor::Audio_pluginAudioProcessorEditor (Audio_plugin
 
 Audio_pluginAudioProcessorEditor::~Audio_pluginAudioProcessorEditor()
 {
+    setLookAndFeel(nullptr);
     tabbedComponent.removeListener(this);
 }
 
