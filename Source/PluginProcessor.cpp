@@ -863,9 +863,12 @@ void Audio_pluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
         restoreDspOrderFifo.push(dspOrder);
     }
     
-    auto samplesRemaining = buffer.getNumSamples();
+    const auto numSamples = buffer.getNumSamples();
+    auto samplesRemaining = numSamples;
     auto maxSamplesToProcess = juce::jmin(samplesRemaining, 64);
 
+    leftPreRMS.set(buffer.getRMSLevel(0,0,numSamples));
+    rightPreRMS.set(buffer.getRMSLevel(1, 0, numSamples));
 
     auto block = juce::dsp::AudioBlock<float>(buffer);
     size_t startSample = 0;
@@ -888,7 +891,8 @@ void Audio_pluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
         samplesRemaining -= samplesToProcess;
     }
 
-
+    leftPosRMS.set(buffer.getRMSLevel(0, 0, numSamples));
+    rightPosRMS.set(buffer.getRMSLevel(1, 0, numSamples));
 }
 
 void Audio_pluginAudioProcessor::MonoChannelDSP::process(juce::dsp::AudioBlock<float> block, const DSP_Order& dspOrder)
