@@ -275,6 +275,14 @@ void ExtendedTabbedButtonBar::removeListener(Listener *l)
 }
 //==============================================================================
 
+void ExtendedTabbedButtonBar::currentTabChanged(int newCurrentTabIndex, const juce::String& newCurrentTabName)
+{
+    juce::ignoreUnused(newCurrentTabName);
+    listeners.call([newCurrentTabIndex](Listener& l)
+        {
+            l.selectedTabChange(newCurrentTabIndex);
+        });
+}
 
 void DSP_GUI::resized() 
 {
@@ -439,6 +447,25 @@ void Audio_pluginAudioProcessorEditor::timerCallback()
     {
         addTabsFromDSPOrder(newOrder);
     }
+
+    if (selectedTabAttachement == nullptr)
+    {
+        selectedTabAttachement = std::make_unique<juce::ParameterAttachment>(*audioProcessor.selectedTab,
+                                [this](float tabNum)
+             {
+                auto newTabNum = static_cast<int>(tabNum);
+                if (juce::isPositiveAndBelow(newTabNum,tabbedComponent.getNumTabs()))
+                {
+                    tabbedComponent.setCurrentTabIndex(newTabNum);
+                }
+                else
+                {
+                    jassertfalse;
+                }
+             });
+
+        selectedTabAttachement->sendInitialUpdate();
+    }
 }
 
 void Audio_pluginAudioProcessorEditor::addTabsFromDSPOrder(Audio_pluginAudioProcessor::DSP_Order newOrder)
@@ -463,5 +490,14 @@ void Audio_pluginAudioProcessorEditor::rebuildInterface()
         auto params = audioProcessor.getParamsForOption(option);
         jassert(params.empty() == false);
         dspGUI.rebuildInterface(params);
+    }
+}
+
+void Audio_pluginAudioProcessorEditor::selectedTabChange(int newCurrentTabIndex)
+{
+    if(selectedTabAttachement)
+    {
+        selectedTabAttachement->setValueAsCompleteGesture(static_cast<float>(newCurrentTabIndex));
+        rebuildInterface();
     }
 }
