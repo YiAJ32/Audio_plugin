@@ -388,6 +388,9 @@ Audio_pluginAudioProcessorEditor::Audio_pluginAudioProcessorEditor (Audio_plugin
     setLookAndFeel(&lookAndFeel);
     addAndMakeVisible(tabbedComponent);
     addAndMakeVisible(dspGUI);
+
+    audioProcessor.guiNeedsLatestDspOrder.set(true);
+
     tabbedComponent.addListener(this);
     startTimerHz(30);
     setSize (600, 400);

@@ -856,6 +856,12 @@ void Audio_pluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
     if (newDSPOrder != DSP_Order()) 
         dspOrder = newDSPOrder;
+
+
+    if (guiNeedsLatestDspOrder.compareAndSetBool(false, true))
+    {
+        restoreDspOrderFifo.push(dspOrder);
+    }
     
     auto samplesRemaining = buffer.getNumSamples();
     auto maxSamplesToProcess = juce::jmin(samplesRemaining, 64);
