@@ -64,6 +64,8 @@ auto getGeneralFilterChoices() {
 };
 
 
+auto getSelectedTabName() { return juce::String("Selected Tab"); }
+
 //==============================================================================
 Audio_pluginAudioProcessor::Audio_pluginAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -166,7 +168,21 @@ Audio_pluginAudioProcessor::Audio_pluginAudioProcessor()
 
 
     initCashedParams<juce::AudioParameterBool*>(bypassParams, bypassNameFuncs);
+
+    auto intParams = std::array
+    {
+        &selectedTab
+    };
+
+    auto intFuncs = std::array
+    {
+        &getSelectedTabName
+    };
+
+    initCashedParams<juce::AudioParameterInt*>(intParams, intFuncs);
 }
+
+
 
 Audio_pluginAudioProcessor::~Audio_pluginAudioProcessor()
 {
@@ -611,6 +627,12 @@ Audio_pluginAudioProcessor::createParameterLayout() {
         juce::ParameterID(name, versionHint),
         name, false));
 
+    name = getSelectedTabName();
+    layout.add(std::make_unique<juce::AudioParameterInt>(juce::ParameterID{ name, versionHint },
+        name,
+        0,
+        static_cast<int>(DSP_OPTION::END_OF_LIST) -1,
+        static_cast<int>(DSP_OPTION::Chorus)));
 
     return layout;
 }
